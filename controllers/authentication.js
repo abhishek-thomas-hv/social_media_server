@@ -1,30 +1,24 @@
 import User from '../models/UserModel.js'
 import Profile from '../models/ProfileModel.js'
 import jwt from 'jsonwebtoken'
-import cookieParser from 'cookie-parser'
 
-
-
-const handleErrors = (errors) =>
-{
+const handleErrors = (errors) => {
 
     let errorMessage = {
-        email:'',
-        password:''
+        email: '',
+        password: ''
     }
 
-    if(errors.code===11000)
-    {
-        errorMessage['email']="An account with that email already exists"
+    if (errors.code === 11000) {
+        errorMessage['email'] = "An account with that email already exists"
         return errorMessage
     }
 
-    if(errors.message.includes('user validation failed'))
-    {
+    if (errors.message.includes('user validation failed')) {
 
         // return errors.errors
-        Object.values(errors.errors).forEach( ({properties}) => {
-            errorMessage[properties.path]=properties.message
+        Object.values(errors.errors).forEach(({ properties }) => {
+            errorMessage[properties.path] = properties.message
         });
     }
 
@@ -32,89 +26,78 @@ const handleErrors = (errors) =>
 }
 
 
-const maxAge = 60*60*24*3
-const secret = 'myjsonwebtokensecret'
+const maxAge = 60 * 60 * 24 * 3
+const secret = process.env.JWT_SECRET
 
-const createToken = (id) =>
-{
-    return jwt.sign({id},secret,{expiresIn:maxAge})
+const createToken = (id) => {
+    return jwt.sign({ id }, secret, { expiresIn: maxAge })
 }
 
-export const SignUp = async (req,res) =>
-{
+export const SignUp = async (req, res) => {
 
-    const {email,password} = req.body
-    const {firstName,lastName,mobileNumber,profilePicture,gender,dateOfBirth} = req.body
+    const { email, password } = req.body
+    const { firstName, lastName, mobileNumber, profilePicture, gender, dateOfBirth } = req.body
     console.log(req.body)
-    try{
+    try {
 
-        const user = await User.create({email,password})
+        const user = await User.create({ email, password })
         const token = createToken(user._id)
         const uid = user._id
-        const profile = await Profile.create({uid,firstName,lastName,mobileNumber,profilePicture,gender,dateOfBirth})
-        res.cookie('jwt_authentication_token',token,{httpOnly:true,maxAge:maxAge*1000,sameSite:"lax"})
-        res.status(201).json({"user":user._id})
- 
-     }
-     catch(error)
-     {
-         console.log(error)
-         const errors = handleErrors(error)
-         res.status(400).json({"errors":errors})
-     }
+        await Profile.create({ uid, firstName, lastName, mobileNumber, profilePicture, gender, dateOfBirth })
+        res.cookie('jwt_authentication_token', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: "lax" })
+        res.status(201).json({ "user": user._id })
 
-}
-
-
-
-export const Login = async (req,res) => 
-{
-    const {email,password} = req.body
-    try{
-        const user = await User.login(email,password)
-        const token = createToken(user._id)
-        res.cookie('jwt_authentication_token',token,{httpOnly:true,maxAge:maxAge*1000,sameSite:"lax"})
-        res.status(200).json({"user":user._id})
     }
-    catch(error)
-    {
+    catch (error) {
         console.log(error)
-        res.status(400).send({"error":"Please check the email/Password you have entered"})
+        const errors = handleErrors(error)
+        res.status(400).json({ "errors": errors })
+    }
+
+}
+
+
+
+export const Login = async (req, res) => {
+    const { email, password } = req.body
+    try {
+        const user = await User.login(email, password)
+        const token = createToken(user._id)
+        res.cookie('jwt_authentication_token', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: "lax" })
+        res.status(200).json({ "user": user._id })
+    }
+    catch (error) {
+        console.log(error)
+        res.status(400).send({ "error": "Please check the email/Password you have entered" })
     }
 }
 
 
-export const Logout = async (req,res) => 
-{
-    res.cookie('jwt_authentication_token','',{httpOnly:true,maxAge:1,sameSite:"lax"})
+export const Logout = async (req, res) => {
+    res.cookie('jwt_authentication_token', '', { httpOnly: true, maxAge: 1, sameSite: "lax" })
     res.status(200).send(true)
 }
 
 
-export const getUserId = async (req,res) => 
-{
+export const getUserId = async (req, res) => {
     const token = req.cookies.jwt_authentication_token;
 
-    if(token)
-    {
+    if (token) {
 
-        jwt.verify(token,'myjsonwebtokensecret',(err,decodedToken) => {
-            if(err)
-            {
-                res.status(400).json({"Token_Error":"Invalid Token"})
+        jwt.verify(token, 'myjsonwebtokensecret', (err, decodedToken) => {
+            if (err) {
+                res.status(400).json({ "Token_Error": "Invalid Token" })
             }
 
-            else
-            {
-                res.status(200).json({"user_id":decodedToken})
+            else {
+                res.status(200).json({ "user_id": decodedToken })
             }
         })
     }
 
-    else
-    {
+    else {
 
-        res.status(400).json({"Token_Error":"No Token Found"})
+        res.status(400).json({ "Token_Error": "No Token Found" })
 
     }
 }

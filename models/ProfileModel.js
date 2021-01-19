@@ -1,54 +1,52 @@
 import mongoose from 'mongoose'
-import validator from 'validator'
-import bcrypt from 'bcrypt'
 
 const profileSchema = mongoose.Schema(
     {
 
         uid:
         {
-            type:String
+            type: String
         },
         firstName:
         {
-            type:String,
+            type: String,
         },
         lastName:
         {
-            type:String,
+            type: String,
         },
-        mobileNumber:{
-            type:String,
+        mobileNumber: {
+            type: String,
         },
-        gender:{
-            type:String
+        gender: {
+            type: String
         },
         dateOfBirth:
         {
-            type:Date
+            type: Date
         },
         profilePicture:
         {
-            type:String
+            type: String
         },
         friends:
         {
-            type:[String],
-            default:[]
+            type: [String],
+            default: []
         },
         friendRequests:
         {
-            type:[String],
-            default:[]
+            type: [String],
+            default: []
         },
-        address:String,
-        education:String,
-        work:String,
-        hobbies:[String]
+        address: String,
+        education: String,
+        work: String,
+        hobbies: [String]
     }
 );
 
 
-const Profile = mongoose.model('profile',profileSchema)
+const Profile = mongoose.model('profile', profileSchema)
 
 export default Profile
