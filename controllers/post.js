@@ -1,6 +1,8 @@
 import Post from '../models/PostModel.js'
 import Profile from '../models/ProfileModel.js'
 import Comment from '../models/CommentModel.js'
+import { statusCodes } from '../lib/statusCodes.js'
+
 
 const asyncGetComment = async (comments) => {
     const modifiedComments = []
@@ -62,12 +64,12 @@ export const getPosts = async (req, res) => {
                 post.comments = await asyncGetComment(post.comments)
             }
 
-            res.status(200).json(posts);
+            res.status(statusCodes.SUCCESS).json(posts);
 
         }
 
         if (posts.length === 0) {
-            res.status(200).json(posts);
+            res.status(statusCodes.SUCCESS).json(posts);
         }
 
         else {
@@ -77,17 +79,13 @@ export const getPosts = async (req, res) => {
 
     }
     catch (error) {
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Get_Error": error.message });
     }
 
 }
 
 export const addPost = async (req, res) => {
     const post = req.body;
-    // console.log(req.body)
-    // const userProfile = await Profile.findOne({uid:post.uid})
-    // post.userName = userProfile.firstName + " " + userProfile.lastName
-    // post.userProfilePicture = userProfile.profilePicture
     const uid = res.locals.user
     post.uid = uid
     const createPost = new Post(post)
@@ -100,11 +98,11 @@ export const addPost = async (req, res) => {
         newPost.userProfilePicture = userProfile.profilePicture
 
         newPost.comments = await asyncGetComment(newPost.comments)
-        res.status(201).json(newPost);
+        res.status(statusCodes.CREATED).json(newPost);
     }
     catch (error) {
         console.log(error)
-        res.status(400).json({ "Creation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Creation_Error": error });
     }
 }
 
@@ -128,12 +126,12 @@ export const addCommentForPost = async (req, res) => {
 
         updatedPost.comments = await asyncGetComment(updatedPost.comments)
 
-        res.status(201).json(updatedPost);
+        res.status(statusCodes.CREATED).json(updatedPost);
     }
     catch (error) {
 
         console.log(error)
-        res.status(400).json({ "Updation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Updation_Error": error });
     }
 
 }
@@ -150,12 +148,12 @@ export const editPost = async (req, res) => {
 
         updatedPost.comments = await asyncGetComment(updatedPost.comments)
 
-        res.status(201).json(updatedPost);
+        res.status(statusCodes.CREATED).json(updatedPost);
     }
     catch (error) {
 
         console.log("YOWERREOR", error)
-        res.status(400).json({ "Updation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Updation_Error": error });
     }
 
 }
@@ -168,12 +166,12 @@ export const deletePost = async (req, res) => {
     try {
 
         await Post.findByIdAndRemove(_id)
-        res.status(200).json({ message: "Post Deleted Successfully" })
+        res.status(statusCodes.SUCCESS).json({ message: "Post Deleted Successfully" })
     }
     catch (error) {
 
         console.log(error)
-        res.status(400).json({ "Updation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Updation_Error": error });
     }
 
 }
@@ -197,12 +195,12 @@ export const addLikeForPost = async (req, res) => {
 
         updatedPost.comments = await asyncGetComment(updatedPost.comments)
 
-        res.status(201).json(updatedPost);
+        res.status(statusCodes.CREATED).json(updatedPost);
     }
     catch (error) {
 
         console.log(error)
-        res.status(400).json({ "Updation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Updation_Error": error });
     }
 
 }
@@ -226,12 +224,12 @@ export const removeLikeForPost = async (req, res) => {
 
         updatedPost.comments = await asyncGetComment(updatedPost.comments)
 
-        res.status(201).json(updatedPost);
+        res.status(statusCodes.SUCCESS).json(updatedPost);
     }
     catch (error) {
 
         console.log(error)
-        res.status(400).json({ "Updation_Error": error });
+        res.status(statusCodes.INTERNALERROR).json({ "Updation_Error": error });
     }
 
 }

@@ -1,6 +1,10 @@
 import User from '../models/UserModel.js'
 import Profile from '../models/ProfileModel.js'
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+import { statusCodes } from '../lib/statusCodes.js'
+
+dotenv.config();
 
 const handleErrors = (errors) => {
 
@@ -45,13 +49,13 @@ export const SignUp = async (req, res) => {
         const uid = user._id
         await Profile.create({ uid, firstName, lastName, mobileNumber, profilePicture, gender, dateOfBirth })
         res.cookie('jwt_authentication_token', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: "lax" })
-        res.status(201).json({ "user": user._id })
+        res.status(statusCodes.CREATED).json({ "user": user._id })
 
     }
     catch (error) {
         console.log(error)
         const errors = handleErrors(error)
-        res.status(400).json({ "errors": errors })
+        res.status(statusCodes.INTERNALERROR).json({ "errors": errors })
     }
 
 }
@@ -64,18 +68,18 @@ export const Login = async (req, res) => {
         const user = await User.login(email, password)
         const token = createToken(user._id)
         res.cookie('jwt_authentication_token', token, { httpOnly: true, maxAge: maxAge * 1000, sameSite: "lax" })
-        res.status(200).json({ "user": user._id })
+        res.status(statusCodes.CREATED).json({ "user": user._id })
     }
     catch (error) {
         console.log(error)
-        res.status(400).send({ "error": "Please check the email/Password you have entered" })
+        res.status(statusCodes.INTERNALERROR).send({ "error": "Please check the email/Password you have entered" })
     }
 }
 
 
 export const Logout = async (req, res) => {
     res.cookie('jwt_authentication_token', '', { httpOnly: true, maxAge: 1, sameSite: "lax" })
-    res.status(200).send(true)
+    res.status(statusCodes.SUCCESS).send(true)
 }
 
 
@@ -86,18 +90,18 @@ export const getUserId = async (req, res) => {
 
         jwt.verify(token, 'myjsonwebtokensecret', (err, decodedToken) => {
             if (err) {
-                res.status(400).json({ "Token_Error": "Invalid Token" })
+                res.status(statusCodes.UNAUTHORISED).json({ "Token_Error": "Invalid Token" })
             }
 
             else {
-                res.status(200).json({ "user_id": decodedToken })
+                res.status(statusCodes.SUCCESS).json({ "user_id": decodedToken })
             }
         })
     }
 
     else {
 
-        res.status(400).json({ "Token_Error": "No Token Found" })
+        res.status(statusCodes.INVALID).json({ "Token_Error": "No Token Found" })
 
     }
 }

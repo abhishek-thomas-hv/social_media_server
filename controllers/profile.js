@@ -1,4 +1,5 @@
 import Profile from '../models/ProfileModel.js'
+import { statusCodes } from '../lib/statusCodes.js'
 
 const getFriendsProfile = async (friends) => {
     const newFriends = []
@@ -17,8 +18,6 @@ const getFriendsProfile = async (friends) => {
             }
 
         )
-        // return newFriends
-
     }
 
     return newFriends
@@ -35,13 +34,13 @@ export const getProfile = async (req, res) => {
         userProfile.friendRequests = await getFriendsProfile(userProfile.friendRequests)
 
         // console.log(userProfile.friendRequests)
-        res.status(200).json(userProfile)
+        res.status(statusCodes.SUCCESS).json(userProfile)
 
     }
 
     catch (error) {
         console.log(error)
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Get_Error": error.message });
 
     }
 }
@@ -55,12 +54,12 @@ export const editProfile = async (req, res) => {
         userProfile.friendRequests = await getFriendsProfile(userProfile.friendRequests)
 
 
-        res.status(200).json(profile)
+        res.status(statusCodes.CREATED).json(profile)
     }
 
     catch (error) {
         console.log(error)
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.SUCCESS).json({ "Get_Error": error.message });
 
     }
 }
@@ -100,11 +99,11 @@ export const getUsers = async (req, res) => {
             }
         ).lean()
 
-        res.status(200).json(users)
+        res.status(statusCodes.SUCCESS).json(users)
     }
 
     catch (error) {
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Get_Error": error.message });
 
     }
 
@@ -114,7 +113,6 @@ export const addFriend = async (req, res) => {
     try {
         const uid = res.locals.user
         const { _id } = req.body
-        // const currentProfile = await Profile.findOne({uid:uid}).lean()
         const userProfile = await Profile.findByIdAndUpdate(_id, {
             $push: {
                 friendRequests: uid
@@ -123,11 +121,11 @@ export const addFriend = async (req, res) => {
 
 
 
-        res.status(200).json(userProfile)
+        res.status(statusCodes.SUCCESS).json(userProfile)
     }
 
     catch (error) {
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Get_Error": error.message });
 
     }
 
@@ -167,11 +165,11 @@ export const acceptRequest = async (req, res) => {
         updatedtUserProfile.friends = await getFriendsProfile(updatedtUserProfile.friends)
         updatedtUserProfile.friendRequests = await getFriendsProfile(updatedtUserProfile.friendRequests)
 
-        res.status(200).json(updatedtUserProfile)
+        res.status(statusCodes.SUCCESS).json(updatedtUserProfile)
     }
 
     catch (error) {
-        res.status(400).json({ "Get_Error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Get_Error": error.message });
 
     }
 
@@ -195,11 +193,11 @@ export const declineRequest = async (req, res) => {
         updatedProfile.friendRequests = await getFriendsProfile(updatedProfile.friendRequests)
 
 
-        res.status(200).json(updatedProfile)
+        res.status(statusCodes.SUCCESS).json(updatedProfile)
     }
 
     catch (error) {
-        res.status(400).json({ "Update_error": error.message });
+        res.status(statusCodes.INTERNALERROR).json({ "Update_error": error.message });
 
     }
 
